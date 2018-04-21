@@ -1,0 +1,80 @@
+#!/bin/bash
+# NGINX Virtual Host Management Utility
+# Version 1.0.0
+# Zoey Schutt zoey@zoeyschutt.com
+
+# The location of the nginx sites-available directory
+NGINXSITEDIRAV="/etc/nginx/sites-available/"
+# The location of the nginx sites-enabled directory
+NGINXSITEDIREN="/etc/nginx/sites-enabled/"
+
+# show the usage instructions
+function nginxsite_help {
+  echo "NGINX Virtual Host Management Utility"
+  echo "Usage: nginxsite [enable/disable] [virtual host file]"
+  exit
+}
+
+# Script has to be run as root!
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root"
+   exit 1
+fi
+
+# If either option is blank, or if a help argument was provided show the usage instructions
+if [ "$1" == "" ] || [ "$2" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  nginxsite_help
+fi
+
+# Check if the provided vhost file exists in the sites-available and sites-enabled nginx conf directories
+sitefile=$(ls $NGINXSITEDIRAV | grep $2)
+sitefileen=$(ls $NGINXSITEDIREN | grep $2)
+
+if [ "$1" == "enable" ]; then
+  # If the file exists in sites-available and doesn't in sites-enabled, make a symlink
+  if [ "$sitefile" == "$2" ] && [ "$sitefileen" != "$2" ]; then
+    echo "Enabling site $2..."
+    ln -s $NGINXSITEDIRAV/$2 $NGINXSITEDIREN/$2
+    echo "$2 enabled. Reload nginx for the changes to take effect."
+    exit
+  # If the file exists in sites-available and sites-enabled, error out
+  elif [ "$sitefile" == "$2" ] && [ "$sitefileen" == "$2" ]; then
+    echo "Site $2 is already enabled."
+    exit
+  # If the file doesn't exist in sites-available, error out
+  else
+    echo "Site $2 does not exist!"
+    exit
+  fi
+elif [ "$1" == "disable" ]; then
+  # If the file exists in sites-enabled and doesn't in sites-available, warn before deleting
+  if [ "$sitefile" != "$2" ] && [ "$sitefileen" == "$2" ]; then
+    echo "The site $2 is enabled, but does not exist in $NGINXSITEDIRAV"
+    echo "Disabling it will delete the file, which could cause the loss of this configuration file."
+    read -r -p "Are you sure you want to disable the site? [y/N] " response
+    response=${response,,}
+    if [[ "$response" =~ ^(yes|y)$ ]]; then
+      echo "Disabling site $2..."
+      rm $NGINXSITEDIREN/$2
+      echo "$2 disabled. Reload nginx for the changes to take effect."
+      exit
+    else
+      echo "Aborting..."
+      exit
+    fi
+  # If the file exists in sites-enabled, delete it
+  elif [ "$sitefileen" == "$2" ]; then
+    echo "Disabling site $2..."
+    rm $NGINXSITEDIREN/$2
+    echo "$2 disabled. Reload nginx for the changes to take effect."
+    exit
+  # If the file doesn't exist in sites-enabled, error out
+  else
+    echo "Site $2 is not enabled!"
+    exit
+  fi
+# If argument 1 wasn't enable or disable, error out
+elif [ "$1" != "" ]; then
+  echo Invalid option: The first argument must be either enable or disable.
+  nginxsite_help
+fi
