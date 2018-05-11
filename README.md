@@ -10,3 +10,5 @@ Usage: `ngxsite [enable/disable] [virtual host file]`
 2. `chmod +x /usr/local/bin/ngxsite`
 3. (*Optional*) Place `extra/ngxsite-completion` in `/usr/share/bash-completion/completions/`. Rename it to `ngxsite`.
 
+If you are running a Debian based distro you can install it using the debian package attached to the release as well.
+
