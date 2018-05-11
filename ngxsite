@@ -1,6 +1,6 @@
 #!/bin/bash
 # NGINX Virtual Host Management Utility
-# Version 1.0.1
+# Version 0.2
 # braincoral https://github.com/braincoral/nginxsite/
 
 # The location of the nginx sites-available directory
