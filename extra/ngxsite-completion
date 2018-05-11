@@ -1,0 +1,40 @@
+# Place at /usr/share/bash-completion/completions/ngxsite
+#
+# Bash completion for ngxsite
+#
+_ngxsite_allcomp()
+{
+       command ls /etc/nginx/$1 2>/dev/null
+}
+_ngxsite_sites()
+{
+       COMPREPLY=( $( compgen -W '$( _ngxsite_allcomp $1 )' -- $cur  ) )
+}
+_ngxsite()
+{
+    local cur prev
+
+    cur=${COMP_WORDS[COMP_CWORD]}
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    case ${COMP_CWORD} in
+        1)
+            COMPREPLY=($(compgen -W "enable disable" -- ${cur}))
+            ;;
+        2)
+            case ${prev} in
+                enable)
+                    _ngxsite_sites sites-available
+                    ;;
+                disable)
+                    _ngxsite_sites sites-enabled
+                    ;;
+            esac
+            ;;
+        *)
+            COMPREPLY=()
+            ;;
+    esac
+}
+
+complete -F _ngxsite ngxsite
