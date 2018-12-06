@@ -27,8 +27,8 @@ if [ "$1" == "" ] || [ "$2" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ];
 fi
 
 # Check if the provided vhost file exists in the sites-available and sites-enabled nginx conf directories
-sitefile=$(ls $NGINXSITEDIRAV | grep -w "^$2")
-sitefileen=$(ls $NGINXSITEDIREN | grep -w "^$2")
+sitefile=$(ls $NGINXSITEDIRAV | grep -w "^$2$")
+sitefileen=$(ls $NGINXSITEDIREN | grep -w "^$2$")
 
 if [ "$1" == "enable" ]; then
   # If the file exists in sites-available and doesn't in sites-enabled, make a symlink
